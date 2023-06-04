@@ -44,7 +44,7 @@ colored_box_list = ["brick.png", "brick2.png", "brick3.png"]
 colored_box_list2 = ["brick4.png"]
 coin_speed_y = 2
 coin_list = []
-level = 1
+level = 0
 num = 0
 '''Ініціалізація звуків'''
 sound_ball_rocket = pygame.mixer.Sound("sounds/rocket_ball_sound.wav")
@@ -56,17 +56,22 @@ sound_ball_wall = pygame.mixer.Sound("sounds/ball_wall_sound.wav")
 restart_image = pygame.image.load("images/restart_image.png")
 start_image = pygame.image.load("images/start_image.png")
 continue_image = pygame.image.load("images/continue_image.png")
+exit_image = pygame.image.load("images/exit_image.png")
 
 
 def draw():
     '''Метод відображення ігрових елементів'''
-    global scores, state, list_of_scores, coin_list, ball_speed_x, ball_speed_y, coin_speed_y, restart_image, lives
+    global scores, state, list_of_scores, coin_list, ball_speed_x, ball_speed_y, coin_speed_y, restart_image, lives, level
 
     screen.fill((113, 128, 87))
     w = 300
     h = 75
     new_start_image = pygame.transform.scale(start_image, (w, h))
     window.blit(new_start_image, (250, 100))  # point
+
+    if level == 2:
+        pass
+
 
     '''Алгоритм початку гри'''
     if not game_over:
@@ -85,6 +90,7 @@ def draw():
             life.draw()
         screen.draw.text("Lives: " + str(lives), topleft=(10, 10))
         screen.draw.text("scores: " + str(scores), topright=(790, 10))
+        screen.draw.text("level: " + str(level), topright=(790, 30))
         # screen.draw.text("scores_list: " + str(list_of_scores), topright=(790, 30))
 
 
@@ -104,6 +110,9 @@ def draw():
         new_continue_image = pygame.transform.scale(continue_image, (w, h))
         window.blit(new_continue_image, (250, 100))  # point
 
+        new_exit_image = pygame.transform.scale(exit_image, (w, h))
+        window.blit(new_exit_image, (250, 350))  # point
+
     elif state == "loose":
         '''Випадок нульової кількості життів (програш)'''
         ball_speed_x = 0  # заморозив м'яч на місці
@@ -115,6 +124,11 @@ def draw():
         h = 75
         new_restart_image = pygame.transform.scale(restart_image, (w, h))
         window.blit(new_restart_image, (250, 100))  # point
+
+
+        new_exit_image = pygame.transform.scale(exit_image, (w, h))
+        window.blit(new_exit_image, (250, 350))  # point
+
         screen.draw.text("ПРОГРАШ", centerx=WIDTH / 2, centery=HEIGHT / 2)
         screen.draw.text("Ваші бали: {}".format(scores), centerx=WIDTH / 2, centery=HEIGHT / 2 + 20)
         screen.draw.text("Найкращий результат: {}".format(max(list_of_scores)), centerx=WIDTH / 2,
@@ -171,9 +185,8 @@ place_lives(30, 30, "heart.png")
 def update():
     global coin_speed_y, coin_list, ball_speed_y, ball_speed_x, scores, bar_list, state, game_over, list_of_scores, colored_box_list2, broke_bar_list
     '''Оновлення стану гри'''
-    # shuffle = [3, 2, 1]
-    # random_x = choice(shuffle)
-    # random_y = choice(shuffle)
+    if len(lives_list) == 0:
+        place_lives(30, 30, "heart.png")
 
     for bar in bar_list:
         if ball.colliderect(bar):
@@ -286,7 +299,7 @@ def update_ball():
 
 def restart_game():
     '''Перезапуск гри'''
-    global game_over, lives, ball_speed_x, ball_speed_y, scores, lives_box, state, lives_list, scores, coin_list
+    global game_over, lives, ball_speed_x, ball_speed_y, scores, lives_box, state, lives_list, scores, coin_list, lives_list
     coin_list = []
     game_over = False
     state = 'play'
@@ -306,12 +319,19 @@ def restart_game():
             lives -= 1
 
 
+
+def start():
+    global game_over
+    game_over = False
+
 def on_mouse_down(pos):
     '''Взаємодія користувача з клавішами меню'''
-    global lives, state, scores, level, num
+    global lives, state, scores, level, num, exit_image
     x, y = pos
+
     if 1 < x < 100 and 1 < y < 100:
         start()
+        state = 'play'
     elif 250 <= x <= 550 and 75 <= y <= 175:
         if state == 'loose':
             scores = 0
@@ -319,11 +339,21 @@ def on_mouse_down(pos):
         level += 1
         num += 1
         restart_game()
+    elif 250 <= x <= 550 and 350 <= y <= 425:  #створити кнопку, розмістити кнопку, вихід з гри позначити координати кнопки
+        if state == 'loose':
+            quit_game()
 
 
-def start():
-    global game_over
-    game_over = False
+def pause():
+    global ball_speed_x, ball_speed_y
+    ball_speed_x = 0
+    ball_speed_y = 0
+
+def quit_game():
+    quit()
+
+
+
 
 
 pgzrun.go()
